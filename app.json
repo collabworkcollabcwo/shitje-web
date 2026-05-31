@@ -1,25 +1,46 @@
 {
   "expo": {
-    "name": "shitje",
+    "name": "Shitje",
     "slug": "shitje",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "scheme": "shitje",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shitje.app"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#FF6B00",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "package": "com.shitje.app"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Lejo akses në fotot për të shtuar foto në shpalljen tënde.",
+          "cameraPermission": "Lejo akses në kamerë për të bërë foto për shpalljen tënde."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Lejo akses në vendndodhjen tënde për të shfaqur shpalljet pranë teje."
+        }
+      ]
+    ]
   }
 }

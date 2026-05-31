@@ -1,0 +1,151 @@
+import React from 'react';
+import { View, Text, Image, StyleSheet, Pressable, Dimensions } from 'react-native';
+import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Listing } from '../types';
+import { Colors } from '../constants/colors';
+import { formatPrice, formatDate } from '../utils/format';
+import { useApp } from '../context/AppContext';
+
+const CARD_WIDTH = (Dimensions.get('window').width - 36) / 2;
+
+interface Props {
+  listing: Listing;
+  fullWidth?: boolean;
+}
+
+export default function ListingCard({ listing, fullWidth }: Props) {
+  const router = useRouter();
+  const { favorites, toggleFavorite } = useApp();
+  const isFavorite = favorites.includes(listing.id);
+  const width = fullWidth ? Dimensions.get('window').width - 24 : CARD_WIDTH;
+
+  return (
+    <Pressable
+      style={[styles.card, { width }]}
+      onPress={() => router.push(`/listing/${listing.id}`)}
+    >
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: listing.images[0] }} style={[styles.image, { width }]} />
+        {listing.isUrgent && (
+          <View style={styles.urgentBadge}>
+            <Text style={styles.urgentText}>URGJENT</Text>
+          </View>
+        )}
+        {listing.isFeatured && !listing.isUrgent && (
+          <View style={styles.featuredBadge}>
+            <Text style={styles.featuredText}>TOP</Text>
+          </View>
+        )}
+        <Pressable
+          style={styles.favoriteButton}
+          onPress={(e) => {
+            e.stopPropagation?.();
+            toggleFavorite(listing.id);
+          }}
+        >
+          <Feather
+            name={isFavorite ? 'heart' : 'heart'}
+            size={18}
+            color={isFavorite ? Colors.accent : Colors.white}
+          />
+        </Pressable>
+      </View>
+      <View style={styles.info}>
+        <Text style={styles.price}>{formatPrice(listing.price)}</Text>
+        <Text style={styles.title} numberOfLines={2}>{listing.title}</Text>
+        <View style={styles.meta}>
+          <Feather name="map-pin" size={11} color={Colors.gray[500]} />
+          <Text style={styles.location}>{listing.location}</Text>
+          <Text style={styles.date}>{formatDate(listing.createdAt)}</Text>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    overflow: 'hidden',
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  imageContainer: {
+    position: 'relative',
+  },
+  image: {
+    height: 150,
+    resizeMode: 'cover',
+  },
+  urgentBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: Colors.accent,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  urgentText: {
+    color: Colors.white,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  featuredBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+  },
+  featuredText: {
+    color: Colors.white,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+  favoriteButton: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    borderRadius: 20,
+    padding: 6,
+  },
+  info: {
+    padding: 10,
+  },
+  price: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.primary,
+    marginBottom: 2,
+  },
+  title: {
+    fontSize: 13,
+    color: Colors.gray[800],
+    marginBottom: 6,
+    lineHeight: 18,
+  },
+  meta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  location: {
+    fontSize: 11,
+    color: Colors.gray[500],
+    flex: 1,
+  },
+  date: {
+    fontSize: 10,
+    color: Colors.gray[400],
+  },
+});

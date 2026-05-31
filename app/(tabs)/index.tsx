@@ -1,0 +1,164 @@
+import React from 'react';
+import { View, Text, ScrollView, FlatList, StyleSheet, Pressable, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { Colors } from '../../constants/colors';
+import { CATEGORIES } from '../../constants/categories';
+import { useApp } from '../../context/AppContext';
+import ListingCard from '../../components/ListingCard';
+import CategoryCard from '../../components/CategoryCard';
+import SearchBar from '../../components/SearchBar';
+
+export default function HomeScreen() {
+  const router = useRouter();
+  const { listings, searchQuery, setSearchQuery } = useApp();
+
+  const featuredListings = listings.filter(l => l.isFeatured);
+  const recentListings = listings
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 10);
+
+  return (
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.logo}>Shitje</Text>
+          <Text style={styles.tagline}>Tregu i Shqipërisë</Text>
+        </View>
+        <Pressable style={styles.notifButton}>
+          <Feather name="bell" size={22} color={Colors.secondary} />
+          <View style={styles.notifDot} />
+        </Pressable>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <SearchBar
+          value={searchQuery}
+          onChangeText={(text) => {
+            setSearchQuery(text);
+            if (text.length > 0) router.push('/(tabs)/search');
+          }}
+          placeholder="Çfarë po kërkon sot?"
+        />
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Kategoritë</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesRow}>
+            {CATEGORIES.map(cat => (
+              <CategoryCard key={cat.id} category={cat} />
+            ))}
+          </ScrollView>
+        </View>
+
+        {featuredListings.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Te veçanta</Text>
+              <Feather name="star" size={16} color={Colors.primary} />
+            </View>
+            <FlatList
+              horizontal
+              data={featuredListings}
+              keyExtractor={item => item.id}
+              renderItem={({ item }) => (
+                <View style={{ marginRight: 12 }}>
+                  <ListingCard listing={item} />
+                </View>
+              )}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 12 }}
+            />
+          </View>
+        )}
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Shpalljet e fundit</Text>
+            <Pressable onPress={() => router.push('/(tabs)/search')}>
+              <Text style={styles.seeAll}>Shiko të gjitha</Text>
+            </Pressable>
+          </View>
+          <View style={styles.grid}>
+            {recentListings.map(listing => (
+              <ListingCard key={listing.id} listing={listing} />
+            ))}
+          </View>
+        </View>
+
+        <View style={{ height: 20 }} />
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    paddingBottom: 4,
+    backgroundColor: Colors.white,
+  },
+  logo: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: Colors.primary,
+    letterSpacing: -0.5,
+  },
+  tagline: {
+    fontSize: 12,
+    color: Colors.gray[500],
+    marginTop: -2,
+  },
+  notifButton: {
+    position: 'relative',
+    padding: 8,
+  },
+  notifDot: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.accent,
+  },
+  section: {
+    marginTop: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.secondary,
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+  seeAll: {
+    fontSize: 14,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+  categoriesRow: {
+    paddingHorizontal: 12,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: 12,
+    gap: 12,
+  },
+});
